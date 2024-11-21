@@ -1,0 +1,14 @@
+{
+  "name": "de-e2e-pw",
+  "version": "1.0.0",
+  "description": "E2E tesztelési tananyag - PlayWright",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.9.1"
+  }
+}
