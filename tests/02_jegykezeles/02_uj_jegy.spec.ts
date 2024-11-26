@@ -1,10 +1,13 @@
 import { test, expect, Page } from '@playwright/test';
+import { LoginPage } from '../../api/LoginPage';
+import { BasePage } from '../../api/BasePage';
 
-async function login(page: Page) {
-  await page.goto('');
-  await page.getByLabel('Login').fill(process.env.USERNAME ?? '');
-  await page.getByLabel('Password').fill(process.env.PASSWORD ?? '');
-  await page.getByRole('button', { name: 'Login' }).click();
+async function login(page: Page, 
+  username: string = process.env.USERNAME ?? '',
+  password: string = process.env.PASSWORD ?? '') {
+  
+  const loginPage = new LoginPage(page);
+  await loginPage.login(username, password);
 }
 
 // Test Area: Login
@@ -28,20 +31,25 @@ const projectName = 'Debreceni Egyetem 2024';
 test.describe('Ticket Management Area', () => {
   test('should navigate to the project', async ({ page }) => {
     // Login steps
-    await login(page);
-
+    const loginPage = new LoginPage(page);
+    await loginPage.login();
+  
     // Navigate to the project
-    await page.getByText('Ugrás projekthez...').click();
-    await page.getByRole('link', { name: projectName }).first().click();
+    const basePage = new BasePage(page);
+    await basePage.toProjectPage(projectName);
+  
     await expect(page.getByRole('link', { name: 'Feladatok' })).toBeVisible();
   });
 
   test('should create a new ticket', async ({ page }) => {
     // Login and navigate to the project
-    await login(page);
+    const loginPage = new LoginPage(page);
+    await loginPage.login();
     
-    await page.getByText('Ugrás projekthez...').click();
-    await page.getByRole('link', { name: projectName }).first().click();
+    // Navigate to the project
+    const basePage = new BasePage(page);
+    await basePage.toProjectPage(projectName);
+
     await page.getByRole('link', { name: 'Feladatok' }).click();
     await page.getByRole('link', { name: 'Új feladat' }).click();
 
