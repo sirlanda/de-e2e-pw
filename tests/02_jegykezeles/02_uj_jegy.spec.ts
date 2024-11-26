@@ -1,13 +1,14 @@
 import { test, expect } from '@playwright/test';
+import dotenv from 'dotenv';
 
 // Test Area: Login
 test.describe('Login Area', () => {
   test('should successfully log in', async ({ page }) => {
-    await page.goto(''); // TODO: URL kiszervezése
+    await page.goto('');
 
     // Login steps
-    await page.getByLabel('Login').fill(''); // TODO: Felhszanálónév kiszervezése
-    await page.getByLabel('Password').fill(''); // TODO: Jelszó kiszervezése
+    await page.getByLabel('Login').fill(process.env.USERNAME ?? '');
+    await page.getByLabel('Password').fill(process.env.PASSWORD ?? '');
     await page.getByRole('button', { name: 'Login' }).click();
 
     // Verify successful login
@@ -19,9 +20,9 @@ test.describe('Login Area', () => {
 test.describe('Ticket Management Area', () => {
   test('should navigate to the project', async ({ page }) => {
     // Login steps
-    await page.goto(''); // TODO: URL kiszervezése
-    await page.getByLabel('Login').fill(''); // TODO: Felhszanálónév kiszervezése
-    await page.getByLabel('Password').fill(''); // TODO: Jelszó kiszervezése
+    await page.goto('');
+    await page.getByLabel('Login').fill(process.env.USERNAME ?? '');
+    await page.getByLabel('Password').fill(process.env.PASSWORD ?? '');
     await page.getByRole('button', { name: 'Login' }).click();
 
     // Navigate to the project
@@ -32,9 +33,9 @@ test.describe('Ticket Management Area', () => {
 
   test('should create a new ticket', async ({ page }) => {
     // Login and navigate to the project
-    await page.goto(''); // TODO: URL kiszervezése
-    await page.getByLabel('Login').fill(''); // TODO: Felhszanálónév kiszervezése
-    await page.getByLabel('Password').fill(''); // TODO: Jelszó kiszervezése
+    await page.goto('');
+    await page.getByLabel('Login').fill(process.env.USERNAME ?? '');
+    await page.getByLabel('Password').fill(process.env.PASSWORD ?? '');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.getByText('Ugrás projekthez...').click();
     await page.getByRole('link', { name: 'Debreceni Egyetem 2024' }).first().click();
