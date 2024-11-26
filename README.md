@@ -4,91 +4,91 @@ E2E tesztelési tananyag - PlayWright
 ## Előfeltételek
 - b1 branch-en található előkészületek, feladatok végrehajtása.
 
-### Do not Repeat Yourself
+## Fenntartható fejlesztés
 
-> Hát maga megbolondult,  
-> Hát maga megbolondult,  
-> Hogy mindent kétszer mond, kétszer mond?  
->  
-> [Karinthy Frigyes: Ady Endre TÖRPE-FEJŰEK](https://www.arcanum.com/hu/online-kiadvanyok/Verstar-verstar-otven-kolto-osszes-verse-2/karinthy-frigyes-1DBC6/igy-irtok-ti-versek-1907-1934-1DDA8/ady-endre-torpe-fejuek-1DDAE/)
-
-Minden alkalommal mikor ugyanazt akarod leírni mint korábban, tedd fel a kérdést: *“Én fogom ezt karbantartani hosszú éveken keresztül?”*
-
-A baseURL-t például tök szépen kiszerveztük! Már soha többé nem kell leírnunk azt a karakterláncot!
-
-#### …, de a megírt 3 teszteset teljesen átfedi egymást
-
-```mermaid
----
-config:
-  sankey:
-    showValues: true
----
-sankey-beta
-
-Feladat rogzites,Login,100
-Feladat rogzites,Navigalas projekthez,100
-Feladat rogzites,Feladat felvetele,100
-Login, T01, 80
-Navigalas projekthez, T01, 80
-Feladat felvetele,T01, 90
-Login, T02_0, 100
-Login, T02_1, 80
-Navigalas projekthez, T02_1, 100
-Login, T02_2, 80
-Navigalas projekthez, T02_2, 80
-Feladat felvetele,T02_2, 90
-
-```
-
-Ugyanazt teszteljük kétszer-háromszor.
-
-#### …, de minden tesztünk így indul:
+A kódduplikáció elkerülése a fenntarthatóság egyik alapfeltétele. Az erre ismertetett egyik technika, hogy hasonló kódrészleteket külön metódusba emeljük ki. Ha ebben vannak változó részek, akkor akár paraméterezhetjük is:
 
 ```typescript
+async function login(page: Page, 
+                     username: string = process.env.USERNAME ?? '',
+                     password: string = process.env.PASSWORD ?? '') {
   await page.goto('');
-  await page.getByLabel('Login').fill(process.env.USERNAME ?? '');
-  await page.getByLabel('Password').fill(process.env.PASSWORD ?? '');
-  await page.getByRole('button', { name: 'Login' }).click();
-  await expect(page.getByRole('link', { name: 'Kijelentkezés' })).toBeVisible();
-```
-
-Emeljük ki a megegyező részt egy olyan függvénybe, ami mindenki számára elérhető:
-
-```typescript
-async function login(page: Page) {
-  await page.goto('');
-  await page.getByLabel('Login').fill(process.env.USERNAME ?? '');
-  await page.getByLabel('Password').fill(process.env.PASSWORD ?? '');
+  await page.getByLabel('Login').fill(username);
+  await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Login' }).click();
 }
 ```
 
-#### …, de ugyanazt azokat a lényegtelen adatokat adjuk meg újra és újra:
+Az ilyen függvényeket azon a ponton érdemes definiálni, ahol az őt használó specifikációk könnyedén elérik.
+
+# Kicsoda POM?
+
+<img src="./pom.jpg" alt="pom" style="zoom:50%;" />
+
+Ennél sokkal hatékonyabb, ha az **objektum orientált** gondolkozást bevetve a metódusokat olyan osztályokban helyezzük el, amelyek a rendszer egy adott részének működését modellezik. Ezeket angolul **Page Object Model**-nek, vagy röviden pom-nak hívjuk.
+
+A **Page Object Model (POM)** egy tervezési minta, amely a webes alkalmazások tesztelésénél különösen előnyös, mert:
+
+1. **Olvashatóság és karbantarthatóság**: Az oldalspecifikus elemeket és műveleteket különálló osztályokban kezeljük, ami könnyen érthető és módosítható kódot eredményez.
+2. **Újrahasznosíthatóság**: Az oldalakhoz kapcsolódó logikát egyszer kell megírni, és több tesztben is használható.
+3. **Egyszerűbb hibakezelés**: Ha az oldal szerkezete változik, csak az adott oldal objektumait kell módosítani, nem minden tesztet.
+4. **Modularitás**: A tesztek és az oldalspecifikus kód elkülönítése javítja a struktúrát és támogatja a nagyobb projekteket.
+5. **Tisztább tesztek**: A tesztkódok fókuszáltak és érthetőbbek lesznek, mivel a teszt maga az üzleti logikára koncentrál, nem a webes elemek kezelésére.
+
+POM tehát segíti a tesztelés hatékonyságát, miközben csökkenti a hosszú távú karbantartási költségeket.
+
+## Hogyan néz ki ez a login esetében például?
+
+Az eddigi függvény saját osztályba kerül `LoginPage.ts`:
 
 ```typescript
-    await page.getByLabel('Tárgy *').fill('Ez az első feladatom');
-    await page.getByLabel('Leírás').fill('Ez az első feladat leírásom.');
-    await page.getByLabel('Felelős').selectOption('76');
-    await page.getByLabel('Befejezés dátuma').fill('2024-11-20');
-    await page.getByLabel('Becsült időigény').fill('0.5');
+import { Page, Locator } from 'playwright';
+import { expect } from 'playwright/test';
+
+export class LoginPage {
+    private page: Page;
+    private username: Locator;
+    private password: Locator;
+    private signInButton: Locator;
+    private signOutLink: Locator; // Ez csalás!
+
+    constructor(page: Page) {
+        this.page = page;
+        this.username = this.page.getByLabel('Username');
+        this.password = this.page.getByLabel('Password');
+        this.signInButton = this.page.getByRole("button", { name: "Login" });
+        this.signOutLink = this.page.getByRole('link', { name: 'Kijelentkezés' });
+    }
+
+    async login(username: string, password: string) {
+        await this.page.goto('/');
+        await this.username.fill(username);
+        await this.password.fill(password);
+        await this.signInButton.click();
+        expect(this.signOutLink).toBeVisible();
+    }
 ```
 
-* A teszt szempontjából lényeges adatok esetén:
-  * Legyen fix az adat, hiszen ezen múlik a teszt sikere
-  * Emeljük ki az adatot változóba, vagy konstansba, ha többször is használni kell az értékét
-* A teszt szempontjából lényegtelen adatok esetén:
-  * Ami nem számít, azt generálhatjuk a validációs szabályok mentén
-  * Amit azonosításra használunk (pl. itt a feladat tárgya), azt generáljuk egyedire, de helyezzünk el benne azonosítókat (dátum, teszt eset)
-* Adatvezérelt tesztelés
-  * És a Mikulásban is hiszek…
+Látható, hogy az eddig több helyen is definiált felületi elemeket mostmár csak egyetlen helyen definiáljuk az osztály konstruktorában.
+A `login` függvény pedig csak használja a már meglevő lokátorokat.
+
+A használata pofonegyszerű:
+
+```typescript
+import { LoginPage } from '../LoginPage';
+
+async function login(page: Page, 
+  username: string = process.env.USERNAME ?? '',
+  password: string = process.env.PASSWORD ?? '') {
+  
+  const loginPage = new LoginPage(page);
+  await loginPage.login(username, password);
+}
+```
 
 ## Feladatok
 
-1. Felesleges tesztek törlése!
-2. login funkció kiemelése
-3. Tesztadatok megadása
-   - projekt
-   - feladat tárgya
-   - befejezés dátuma
-   - becsült időigény
+- login -> LoginPage
+- MainPage / BasePage
+  - menu
+  - searchBar
