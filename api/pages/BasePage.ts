@@ -1,6 +1,6 @@
 import { Page } from 'playwright';
-import { MenuModule } from './MenuModule';
-import { SearchBarModule } from './SearchBarModule';
+import { MenuModule } from '../components/MenuModule';
+import { SearchBarModule } from '../components/SearchBarModule';
 import { expect } from '@playwright/test';
 
 export class BasePage {
