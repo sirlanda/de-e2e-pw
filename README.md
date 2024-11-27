@@ -2,93 +2,76 @@
 E2E tesztelési tananyag - PlayWright 
 
 ## Előfeltételek
-- b1 branch-en található előkészületek, feladatok végrehajtása.
+- b3 branch-en található előkészületek, feladatok végrehajtása.
 
-## Fenntartható fejlesztés
+## Tesztek szerkezete
 
-A kódduplikáció elkerülése a fenntarthatóság egyik alapfeltétele. Az erre ismertetett egyik technika, hogy hasonló kódrészleteket külön metódusba emeljük ki. Ha ebben vannak változó részek, akkor akár paraméterezhetjük is:
+A **Gherkin szintaxis** egy ember által olvasható formátum, amelyet a viselkedésalapú fejlesztéshez (*Behavior-Driven Development*, BDD) használnak. Lehetővé teszi a fejlesztők, tesztelők és üzleti szereplők közötti kommunikációt az alkalmazás működéséről, olyan módon, hogy mindegyik fél könnyen megérthesse.  
 
-```typescript
-async function login(page: Page, 
-                     username: string = process.env.USERNAME ?? '',
-                     password: string = process.env.PASSWORD ?? '') {
-  await page.goto('');
-  await page.getByLabel('Login').fill(username);
-  await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: 'Login' }).click();
-}
+A Gherkin lényegében egy szabályos nyelvtanra épülő szöveges formátum, amelyet például a **Cucumber** keretrendszer használ a tesztesetek definiálására és végrehajtására. A szintaxis lehetővé teszi, hogy a teszteseteket az üzleti követelményekhez igazítsák.
+
+### Alapszintaxis elemei:
+
+1. **Feature**: Az adott alkalmazás egy funkciójának leírása.  
+   - *Példa*: `Feature: Bejelentkezés a rendszerbe`
+
+2. **Scenario**: Egy konkrét forgatókönyv, amely egy adott funkciót vagy annak részét teszteli.  
+   - *Példa*: `Scenario: Sikeres bejelentkezés érvényes adatokkal`
+
+3. **Given**: A kezdeti állapot vagy feltétel meghatározása.  
+   - *Példa*: `Given a felhasználó a bejelentkezési oldalon van`
+
+4. **When**: Az a művelet vagy esemény, amelyet végrehajtanak.  
+   - *Példa*: `When a felhasználó megadja az érvényes felhasználónevet és jelszót`
+
+5. **Then**: Az elvárt eredmény leírása.  
+   - *Példa*: `Then a felhasználó sikeresen bejelentkezik`
+
+6. **And/But**: Kiegészítő feltételek vagy események.  
+   - *Példa*: `And a felhasználó a kezdőoldalra kerül`
+
+### Példa egy teljes forgatókönyvre:
+
+```gherkin
+Feature: Bejelentkezés
+
+  Scenario: Sikeres bejelentkezés érvényes adatokkal
+    Given a felhasználó a bejelentkezési oldalon van
+    When a felhasználó megadja az érvényes felhasználónevet és jelszót
+    Then a felhasználó sikeresen bejelentkezik
+    And a kezdőoldal megjelenik
 ```
 
-Az ilyen függvényeket azon a ponton érdemes definiálni, ahol az őt használó specifikációk könnyedén elérik.
+### Mire jó a Gherkin?
 
-# Kicsoda POM?
+- **Közös nyelv**: Az üzleti szereplők és fejlesztők számára egyaránt érthető.
+- **Automatizált tesztelés alapja**: A Gherkin-ben megírt forgatókönyveket a tesztelési eszközök (pl. Cucumber, SpecFlow) automatikusan végrehajthatják.
+- **Dokumentáció**: Az alkalmazás funkcióinak jól strukturált leírását adja.
 
-<img src="./pom.jpg" alt="pom" style="zoom:50%;" />
+A Gherkin tehát hatékony eszköz a tesztelés és az üzleti követelmények összehangolására, és támogatja a fejlesztési folyamat átláthatóságát.
 
-Ennél sokkal hatékonyabb, ha az **objektum orientált** gondolkozást bevetve a metódusokat olyan osztályokban helyezzük el, amelyek a rendszer egy adott részének működését modellezik. Ezeket angolul **Page Object Model**-nek, vagy röviden pom-nak hívjuk.
+## Step-by-step
 
-A **Page Object Model (POM)** egy tervezési minta, amely a webes alkalmazások tesztelésénél különösen előnyös, mert:
-
-1. **Olvashatóság és karbantarthatóság**: Az oldalspecifikus elemeket és műveleteket különálló osztályokban kezeljük, ami könnyen érthető és módosítható kódot eredményez.
-2. **Újrahasznosíthatóság**: Az oldalakhoz kapcsolódó logikát egyszer kell megírni, és több tesztben is használható.
-3. **Egyszerűbb hibakezelés**: Ha az oldal szerkezete változik, csak az adott oldal objektumait kell módosítani, nem minden tesztet.
-4. **Modularitás**: A tesztek és az oldalspecifikus kód elkülönítése javítja a struktúrát és támogatja a nagyobb projekteket.
-5. **Tisztább tesztek**: A tesztkódok fókuszáltak és érthetőbbek lesznek, mivel a teszt maga az üzleti logikára koncentrál, nem a webes elemek kezelésére.
-
-POM tehát segíti a tesztelés hatékonyságát, miközben csökkenti a hosszú távú karbantartási költségeket.
-
-## Hogyan néz ki ez a login esetében például?
-
-Az eddigi függvény saját osztályba kerül `LoginPage.ts`:
+Ha megnézzük a tesztfutások által generált jegyzőkönyvet, akkor elég béna leírásokat találunk, ami ráadásul nem is segít a gyakorlatlan (üzleti oldalról érkező) szereplőknek. Hogyan tehetjük olvashatóbbá és struktúráltabbá a tesztjeinket?
 
 ```typescript
-import { Page, Locator } from 'playwright';
-import { expect } from 'playwright/test';
-
-export class LoginPage {
-    private page: Page;
-    private username: Locator;
-    private password: Locator;
-    private signInButton: Locator;
-    private signOutLink: Locator; // Ez csalás!
-
-    constructor(page: Page) {
-        this.page = page;
-        this.username = this.page.getByLabel('Username');
-        this.password = this.page.getByLabel('Password');
-        this.signInButton = this.page.getByRole("button", { name: "Login" });
-        this.signOutLink = this.page.getByRole('link', { name: 'Kijelentkezés' });
-    }
-
-    async login(username: string, password: string) {
-        await this.page.goto('/');
-        await this.username.fill(username);
-        await this.password.fill(password);
-        await this.signInButton.click();
-        expect(this.signOutLink).toBeVisible();
-    }
+    await test.step('Bejelentkezés', async () => {
+      const loginPage = new LoginPage(page);
+      await loginPage.login();
+    });
 ```
 
-Látható, hogy az eddig több helyen is definiált felületi elemeket mostmár csak egyetlen helyen definiáljuk az osztály konstruktorában.
-A `login` függvény pedig csak használja a már meglevő lokátorokat.
+Gyakorlatilag a megjegyzések helyére beilleszthetjük ezeket a `test.step` hívásokat, és a megjegyzés tartalmát adjuk át első paraméternek. A UI-on keresztül (`npx playwright test --ui`) vagy a generált jelentésen keresztül (`npx playwright show-report`) látható, hogy mennyivel olvashatóbbá és érthetőbbé vált a tesztesetünk.
 
-A használata pofonegyszerű:
+Arra kell csak vigyázni, hogy az így definiált kódblokkok nem publikálják a bennük létrehozott változókat. Ha egy változó értékére több blokkban is szükség van, akkor az első őt használó lépés előtt kell definiálni. (pl. esetünkben a feladat tárgya lehet ilyen)
 
-```typescript
-import { LoginPage } from '../LoginPage';
-
-async function login(page: Page, 
-  username: string = process.env.USERNAME ?? '',
-  password: string = process.env.PASSWORD ?? '') {
-  
-  const loginPage = new LoginPage(page);
-  await loginPage.login(username, password);
-}
-```
+Fontos, hogy ne maradjon ki az `await` kulcsszó, mert különben nem várja meg a végrehajtást a futó szál!
 
 ## Feladatok
 
-- login -> LoginPage
-- MainPage / BasePage
-  - menu
-  - searchBar
+1. Feleltessük meg egymásnak a Playwright által nyújtott API lehetőségeit és a Gherkin szintaxis elemeit!
+   1. feature = spec fájl
+   2. scenario = teszt
+   3. given, when, then blokk = tesztlépés (utasítások és elvárások – mindig legyenek elvárások!)
+2. Alakítsuk át a meglévő teszteket ebbe a formátumba!
+3. A `test.step` használatával struktúráljuk a meglevő eseteket!
