@@ -2,7 +2,7 @@
 E2E tesztelési tananyag - PlayWright 
 
 ## Előfeltételek
-- b1 branch-en található előkészületek, feladatok végrehajtása.
+- b2 branch-en található előkészületek, feladatok végrehajtása.
 
 ## Fenntartható fejlesztés
 
