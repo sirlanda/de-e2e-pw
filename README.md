@@ -36,6 +36,15 @@ E2E tesztelési tananyag - PlayWright
   - `main` branch
   - feladatonként 2 branch: kezdeti és végállapot
     - pl. `a1`, `a1-solution`
+    - A feladatokon ABC sorrendben kell végigmenni, mert így épülnek egymásra.
+    - Minden feladat branch-en a [README.md] tartalmazza az aktuális tananyagot és a hozzá tartozó feladatok leírását.
+    - Ugyanitt látható az is, ha a végrehajtásnak előfeltétele van. Ez tipikusan az előző feladat végrehajtása. Ha valaki a feladat branch-ből indul ki, akkor ezek az előfeltételek már teljesülnek, csak azok számára releváns ez, aki folyamatában végzi el a feladatokat, és a saját munkaterületén dolgozik az első feladatból kiindulva.
+    - a feladatok elkezdésekor érdemes lehet inicializálni a playwright-ot
+    - ```bash
+      nvm use
+      npm i
+      npx playwright install
+      ```
   - Miről lesz szó?
     - Fenntartható fejlesztés
       - ismétlődések kerülése
@@ -54,10 +63,10 @@ E2E tesztelési tananyag - PlayWright
 
 - Feladatok (branch-ek)
 
-  - b1 - alapvető beállítások
+  - [b1 - alapvető beállítások](https://github.com/sirlanda/de-e2e-pw/tree/b1)
     - baseURL beállítás
     - védett értékek kiszervezése `.env` fájlba
-  - b2 - DRY
+  - [b2 - DRY](https://github.com/sirlanda/de-e2e-pw/tree/b2)
     - felesleges tesztek törlése!
     - tesztadatok
       - fix
@@ -65,7 +74,7 @@ E2E tesztelési tananyag - PlayWright
         - generált
           - azonosításra alkalmas
     - login
-  - b3 - POM
+  - [b3 - POM](https://github.com/sirlanda/de-e2e-pw/tree/b3)
     - OOP deduplikáció
     - login -> LoginPage
     - MainPage / BasePage
@@ -73,8 +82,8 @@ E2E tesztelési tananyag - PlayWright
       - searchBar
       - goto
       - at?
-  - b4 - tesztek szerkezete
+  - [b4 - tesztek szerkezete](https://github.com/sirlanda/de-e2e-pw/tree/b4)
     - GHERKIN
     - step-by-step
-  - b5 - projekt szerkezet
+  - [b5 - projekt szerkezet](https://github.com/sirlanda/de-e2e-pw/tree/b5)
     - TestLink kapcsolat
