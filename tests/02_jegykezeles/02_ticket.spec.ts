@@ -1,13 +1,13 @@
 import { test, expect, Page } from '@playwright/test';
-import { LoginPage } from '../../api/LoginPage';
-import { BasePage } from '../../api/BasePage';
+import { BasePage } from '../../api/pages/BasePage';
+import { LoginPage } from '../../api/pages/LoginPage';
 
 // Test Area: Ticket Management
 test.describe('Ticket Management Area', () => {
 
   const projectName = 'Debreceni Egyetem 2024';
 
-  test('Projekt megnyitás', async ({ page }) => {
+  test('TL-206: Projekt megnyitás', async ({ page }) => {
     await test.step('Bejelentkezés', async () => {
       const loginPage = new LoginPage(page);
       await loginPage.login();
