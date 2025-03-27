@@ -47,10 +47,10 @@ import { expect } from 'playwright/test';
 
 export class LoginPage {
     private page: Page;
-    private username: Locator;
-    private password: Locator;
-    private signInButton: Locator;
-    private signOutLink: Locator; // Ez csalás!
+    readonly username: Locator;
+    readonly password: Locator;
+    readonly signInButton: Locator;
+    readonly signOutLink: Locator; // Ez csalás!
 
     constructor(page: Page) {
         this.page = page;
